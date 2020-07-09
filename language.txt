@@ -1,0 +1,35 @@
+Floopulo has a single datatype, the stack, which stores other stacks.
+
+There are two main stacks, the left and the right one. They both start off empty.
+Stacks have the property `depth`, representing how deeply nested access to the stack should be performed.
+There is a current stack, which starts as the left one.
+The "active" stack refers to the current stack, nested into `depth` times. For example, if the current stack is `(((()) () (()()))) ()` and the depth is 2, the active stack is `(())`.
+
+To "fail" is undefined behaviour.
+
+Programs follow the following EBNF:
+program = (__ name __ ":=" code)+ __
+code = (_ (name / "(" code _ ")"))*
+name = /[^ \n\t():]+/
+_ = " "*
+__ = /[ \n\t]*/
+
+`program` consists of a list of function definitions. Each one binds the name to the code in a global namespace. If the name is already bound, it is overwritten.
+After the functions are bound, the `main` function is executed. If no such function exists, the program fails.
+
+To execute a user-made function is to run all the names in it by looking them up in the namespace and executing them.
+To execute code wrapped in parentheses is to run the names in it as normal *if* the active stack is not empty.
+To execute a built-in function is to perform its defined action.
+Executing code nested in more than 900 layers of calls is undefined.
+If an undefined function is executed, the program fails.
+
+The built-in commands are as follows:
+
+new: Create a new empty stack and put it on the top of the active stack.
+pop: Destroy the stack on top of the active stack. If the active stack is empty, the program fails.
+enter: Increase the current stack's depth by 1. You can think of this as a cursor "entering" the top stack on the active stack. If the active stack is empty, the program fails.
+exit: Decream the current stack's depth by 1. You can think of this as the cursor exiting the current stack. If the current stack's depth is already 0, the program fails.
+warp: Swap the current stack: if it's the left stack, change it to the right; if it's the right, change it to the left.
+send: Send the top element of the active stack to the active opposite stack; the left one if the current stack is the right, the right one if the current stack is the left.
+read: Create a new stack of empty stacks of length N, where N is the numeric value of a single byte read as input, and push the new stack to the active stack.
+write: Pop a stack from the active stack and write N as a single byte, where N is the popped stack's length. If N is over 255, the program fails.
