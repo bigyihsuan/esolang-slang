@@ -17,7 +17,8 @@ __ = /[ \n\t]*/
 class Token(Flag):
 	# Defines the tokens
 	NAME = auto()
-	DEF = auto()
+	DEFSTART = auto()
+	DEFEND = auto()
 	IFSTART = auto()
 	IFEND = auto()
 	END = auto()
@@ -25,6 +26,7 @@ class Token(Flag):
 class LexerState(Flag):
 	BEGIN = auto()
 	INNAME = auto()
+	INDEF = auto()
 
 
 # https://github.com/bigyihsuan/International-Phonetic-Esoteric-Language/blob/master/src/lexer.py
@@ -57,12 +59,25 @@ class Lexer:
 				return (Lex(chars[c], c), code[i+1:])
 			if c in ":": # check for assignemnt op
 				if code[i+1] in "=":
-					return (Lex(Token.DEF, ":="), code[i+2:])
+					return (Lex(Token.DEFSTART, ":="), code[i+2:])
 			elif c not in " \n\t():": # a name is found, continue until whitespace or (): is hit
 				lexeme += c
 				continue
+			elif c in "\n": # definitions end at a newline
+				return (Lex(Token.DEFEND, ""), code[i+1:])
 			elif len(code) > 0:
 				return (Lex(Token.NAME, lexeme), code[i+len(lexeme):])
 			else:
 				return (Lex(Token.END, ""), "")
+	def tokenize(self, code):
+		# input is code
+		# output is a list of Lexes
+		lexes = []
+		c = code
+		lastTok = Token.BEGIN
+		while lastTok != Token.END:
+			l,c = self.getNextToken(c)
+			lastTok = l.token
+			lexes.append(l)
+		return lexes
 

@@ -1,12 +1,19 @@
 import stacks
+import lexer
+import parser
+import evaluator
 
-left = stacks.Stack()
-right = stacks.Stack()
 
-functions = {} # str name to int location in lex list
+locations = {} # str name to int location in lex list
 #lex what?
 
 #important vars
-pointer = 0
-leftorright = False #False is left True is right
-commands = ("new","pop","enter","exit","warp","send","read","write") # pre de
+currentStack = left
+
+# input s
+
+
+
+
+
+#Hereby on 6:06, July 9, 2020, Itzz me is declared confused.
