@@ -1,13 +1,18 @@
 from lexer import Token as T
 import stacks as S
 
-def evaluate(lexes, locations):
+def evaluate(lexes, locations, debugmode):
 	# input is a Lex list, and a dict of locations
 	# outputs nothing
 	cursor = S.Cursor()
 	ep = locations["main"] if "main" in locations else len(lexes)
 	executionStack = []
 	while ep < len(lexes):
+		if debugmode:
+			print("Left:", cursor.left, "<-- currentStack" if cursor.left == cursor.active else "")
+			print("Right:", cursor.left, "<-- currentStack" if cursor.right == cursor.active else "")
+			print("Execution:", executionStack)
+			print()
 		if lexes[ep].token == T.NAME: # jump to the name definition
 			if lexes[ep].lexeme in "new":
 				cursor.new()

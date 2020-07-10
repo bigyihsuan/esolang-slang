@@ -6,6 +6,7 @@ import sys, os
 
 lexes = []
 locations = {}
+debugmode = False
 
 if len(sys.argv) > 1:
 	foundFile = -1
@@ -13,8 +14,11 @@ if len(sys.argv) > 1:
 		if os.path.isfile(sys.argv[i]):
 			foundFile = i
 
+	if sys.argv[1] == "-d":
+		debugmode = True
+
 	if foundFile == -1:
-		code = sys.argv[1]
+		code = sys.argv[2] if debugmode else sys.argv[1]
 	else:
 		source = open(sys.argv[foundFile], "r")
 		code = source.read()
@@ -23,6 +27,11 @@ if len(sys.argv) > 1:
 
 	lexes = L.tokenize(code)
 	locations = P.mapNames(lexes)
-	E.evaluate(lexes, locations)
+
+	if debugmode:
+		print("Lexes:", lexes)
+		print("Locations:", locations)
+
+	E.evaluate(lexes, locations, debugmode)
 
 #Hereby on 6:06, July 9, 2020, Itzz me is declared confused.
