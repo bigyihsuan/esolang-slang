@@ -16,6 +16,7 @@ __ = /[ \n\t]*/
 
 class Token(Flag):
 	# Defines the tokens
+	BEGIN = auto()
 	NAME = auto()
 	DEFSTART = auto()
 	DEFEND = auto()
