@@ -76,7 +76,7 @@ def tokenize(code):
 	c = code
 	lastTok = Token.BEGIN
 	while lastTok != Token.END:
-		l,c = self.getNextToken(c)
+		l,c = getNextToken(c)
 		lastTok = l.token
 		lexes.append(l)
 	return lexes
