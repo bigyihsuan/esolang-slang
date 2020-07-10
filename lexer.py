@@ -54,6 +54,7 @@ def getNextToken(code):
 	#	a Lex that contains the lexeme and its token
 	#	the code with the Lex removed
 	lexeme = ""
+	inName = False
 	for i,c in enumerate(code):
 		if c in chars: # check for ifs
 			return (Lex(chars[c], c), code[i+1:])
@@ -63,9 +64,10 @@ def getNextToken(code):
 		elif c not in " \n\t():": # a name is found, continue until whitespace or (): is hit
 			lexeme += c
 			continue
-		elif c in "\n": # definitions end at a newline
+		elif c in "\n" and not inName: # definitions end at a newline
 			return (Lex(Token.DEFEND, ""), code[i+1:])
 		elif len(code) > 0:
+			inName = False
 			return (Lex(Token.NAME, lexeme), code[i+len(lexeme):])
 		else:
 			return (Lex(Token.END, ""), "")
