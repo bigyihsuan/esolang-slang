@@ -1,4 +1,5 @@
 from enum import Flag, auto
+import string
 
 """
 program = (__ name __ ":=" code)+ __
@@ -22,12 +23,14 @@ class Token(Flag):
 	DEFEND = auto()
 	IFSTART = auto()
 	IFEND = auto()
+	COMMENT = auto()
 	END = auto()
 
 class LexerState(Flag):
 	BEGIN = auto()
 	INNAME = auto()
 	INDEF = auto()
+	INCOMMENT = auto()
 
 
 # https://github.com/bigyihsuan/International-Phonetic-Esoteric-Language/blob/master/src/lexer.py
@@ -48,38 +51,56 @@ class Lex:
     def __repr__(self):
         return "<Lex: {}, {}>".format(self.token, repr(self.lexeme))
 
-def getNextToken(code):
-	chars = {"(": Token.IFSTART, ")": Token.IFEND}
+def getNextToken(code, debugmode):
 	# returns a tuple that contains:
 	#	a Lex that contains the lexeme and its token
 	#	the code with the Lex removed
+	chars = {"(": Token.IFSTART, ")": Token.IFEND}
 	lexeme = ""
-	inName = False
+	state = LexerState.BEGIN
 	for i,c in enumerate(code):
-		if c in chars: # check for ifs
-			return (Lex(chars[c], c), code[i+1:])
-		if c in ":": # check for assignemnt op
-			if code[i+1] in "=":
-				return (Lex(Token.DEFSTART, ":="), code[i+2:])
-		elif c not in " \n\t():": # a name is found, continue until whitespace or (): is hit
-			lexeme += c
-			continue
-		elif c in "\n" and not inName: # definitions end at a newline
-			return (Lex(Token.DEFEND, ""), code[i+1:])
-		elif len(code) > 0:
-			inName = False
-			return (Lex(Token.NAME, lexeme), code[i+len(lexeme):])
-		else:
-			return (Lex(Token.END, ""), "")
-def tokenize(code):
+		if debugmode:
+			print("saw", repr(c))
+		if state == LexerState.BEGIN:
+			if c in string.whitespace:
+				code = code[1:]
+				continue
+			if c in chars: # check for ifs
+				return (Lex(chars[c], c), code[1:])
+			elif c in ":": # check for assignemnt op
+				return (Lex(Token.DEFSTART, ":="), code[2:])
+			elif c in "/":
+				state = LexerState.INCOMMENT
+			elif c not in " \n\t():": # a name is found, continue until whitespace or (): is hit
+				state = LexerState.INNAME
+		lexeme += c
+		if state == LexerState.INCOMMENT:
+			if c in "\n": # comments end at a newline
+				return (Lex(Token.COMMENT, lexeme), code[len(lexeme):])
+		elif state == LexerState.INNAME:
+			if c in " \n\t():": # names end at one of these
+				return (Lex(Token.NAME, lexeme[:-1]), code[len(lexeme)-1:])
+	return (Lex(Token.END, ""), "")
+
+def tokenize(code, debugmode):
 	# input is code
 	# output is a list of Lexes
 	lexes = []
 	c = code
 	lastTok = Token.BEGIN
+	inDefinition = False
+	if debugmode: print("Creating lex list:")
 	while lastTok != Token.END:
-		l,c = getNextToken(c)
-		lastTok = l.token
+		if debugmode:
+			print(lexes, c)
+		l,c = getNextToken(c, debugmode)
 		lexes.append(l)
+		if inDefinition and l.token == Token.NAME and c[0] in "\n":
+			lexes.append(Lex(Token.DEFEND, ""))
+			lastTok = Token.DEFEND
+		else:
+			lastTok = l.token
+		if l.token == Token.DEFSTART and not inDefinition:
+			inDefinition = True
 	return lexes
 
