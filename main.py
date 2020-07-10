@@ -8,16 +8,16 @@ lexes = []
 locations = {}
 
 if len(sys.argv) > 1:
-    foundFile = -1
-    for i in range(1, len(sys.argv)):
-        if os.path.isfile(sys.argv[i]):
-            foundFile = i
+	foundFile = -1
+	for i in range(1, len(sys.argv)):
+		if os.path.isfile(sys.argv[i]):
+			foundFile = i
 
 	if foundFile == -1:
-        code = sys.argv[1]
+		code = sys.argv[1]
 	else:
-        source = open(sys.argv[foundFile], "r")
-        code = source.read()
+		source = open(sys.argv[foundFile], "r")
+		code = source.read()
 	
 	code += " "
 
