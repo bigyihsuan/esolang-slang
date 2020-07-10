@@ -1,85 +1,63 @@
 import sys
 
-class Stack:
-	# actually a linked list in disguise
-	def __init__(self, isNested, parent):
-		self.children = [] # children[-1] is the top of the stack
-		self.isNested = isNested
-		self.parent = parent
-
-	def __len__(self):
-		return len(self.children)
-	
-	def __repr__(self):
-		return "<Stack: children: {}, parent: {}>".format(self.children, self.parent)
-
-	def push(self, ele):
-		self.children.append(ele)
-	
-	def pop(self):
-		return self.children.pop()
-	
 class Cursor:
 	def __init__(self):
-		self.left = Stack(0, False)
-		self.right = Stack(0, False)
+		self.left = []
+		self.right = []
+		self.current = self.left
+		self.other = self.right
 		self.active = self.left
 		self.inactive = self.right
-		self.leftDepth = 0
-		self.rightDepth = 0
-		self.currentDepth = self.leftDepth
-		self.currentStack = self.active
-		self.inactiveStack = self.inactive
+		self.activeDepth = 0
+		self.otherDepth = 0
 	
-	def incrementDepth(self):
-		if self.active == self.left:
-			self.leftDepth += 1
-			self.currentDepth = self.leftDepth
-		else:
-			self.rightDepth += 1
-			self.currentDepth = self.rightDepth
+	def _push(self, ele):
+		self.current.append(ele)
 	
-	def decrementDepth(self):
-		if self.active == self.left:
-			self.leftDepth -= 1
-			self.currentDepth = self.leftDepth
-		else:
-			self.rightDepth -= 1
-			self.currentDepth = self.rightDepth
-
+	def _pop(self):
+		return self.current.pop()
+	
 	def new(self):
-		self.active.push(Stack(True, self))
+		self._push([])
 	
 	def pop(self):
-		self.active.pop()
+		self._pop()
 	
 	def enter(self):
-		self.currentStack = self.currentStack.children[-1]
-		self.incrementDepth()
+		self.activeDepth += 1
+		self.active = self.current
+		i = self.activeDepth
+		while i > 0:
+			for e in self.active:
+				if len(e):
+					self.active = e
+					break
+			i -= 1
 	
 	def exit(self):
-		self.currentStack = self.currentStack.parent
-		self.decrementDepth()
+		self.activeDepth -= 1
+		self.active = self.current
+		i = self.activeDepth
+		while i > 0:
+			for e in self.active:
+				if len(e):
+					self.active = e
+					break
+			i -= 1
 	
 	def warp(self):
-		if self.active == self.left:
-			self.active = self.right
-			self.inactive = self.left
-		else:
-			self.active = self.left
-			self.inactive = self.right
-		self.currentStack = self.active
-		self.inactiveStack = self.inactive
+		self.current, self.other = self.other, self.current
+		self.active, self.inactive = self.inactive, self.active
+		self.activeDepth, self.otherDepth = self.otherDepth, self.activeDepth
 	
 	def send(self):
-		self.inactive.push(self.active.pop())
+		self.inactive.append(self.active.pop())
 	
 	def read(self):
-		new = Stack(True, self.active)
-		num = ord(sys.stdin.read(1))
-		for i in range(num):
-			new.push(Stack(True, new))
-		self.active.push(new)
+		n = []
+		for i in range(ord(sys.stdin.read(1))):
+			n.append([])
+		self.active.append(n)
 	
 	def write(self):
 		print(chr(len(self.active.pop())), end="")

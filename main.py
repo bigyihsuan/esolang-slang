@@ -22,7 +22,7 @@ if len(sys.argv) > 1:
         source = open(sys.argv[foundFile], "r")
         code = source.read()
 
-    code += " "
+    code += "\n"
 
     lexes = L.tokenize(code, debugmode)
     locations = P.mapNames(lexes, debugmode)

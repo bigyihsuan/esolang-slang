@@ -36,7 +36,7 @@ def evaluate(lexes, locations, debugmode):
 			else:
 				executionStack.append(ep)
 				ep = locations[lexes[ep].lexeme]-1
-		elif lexes[ep].token == T.DEFEND:
+		elif lexes[ep].token == T.DEFEND and len(executionStack):
 			ep = executionStack.pop()
 		elif lexes[ep].token == T.IFSTART:
 			if len(cursor.active) == 0: # jump to the endif if empty
