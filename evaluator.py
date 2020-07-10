@@ -1,13 +1,10 @@
 from lexer import Token as T
-import stacks as s
-
-commands = ("new","pop","enter","exit","warp","send","read","write") # pre defined
-
-cursor = s.Cursor()
+import stacks as S
 
 def evaluate(lexes, locations):
 	# input is a Lex list, and a dict of locations
 	# outputs nothing
+	cursor = S.Cursor()
 	ep = locations["main"] if "main" in locations else len(lexes)
 	executionStack = []
 	while ep < len(lexes):
